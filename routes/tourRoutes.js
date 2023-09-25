@@ -2,16 +2,26 @@ const express = require("express")
 
 const router = express.Router()
 
-// ROUTES UNTUK TOUERS
+const toursController = require(`../controllers/toursController`)
+
+router.param("id", toursController.checkData)
+
 router
   .route("/")
-  .get(getAllTours)
-  .post(createTour)
+  .get(toursController.getAllTours)
+  .post(
+    toursController.checkBody,
+    toursController.createTour
+  )
+
+router
+  .route("/model")
+  .post(toursController.createTourModel)
 
 router
   .route("/:id")
-  .get(getTourById)
-  .patch(editTour)
-  .delete(removeTour)
+  .get(toursController.getTourById)
+  .patch(toursController.editTour)
+  .delete(toursController.removeTour)
 
 module.exports = router
