@@ -38,6 +38,14 @@ const getTourById = async (req, res) => {
     const id = req.params.id
     const tour = await Tour.findById(id)
 
+    if (!tour) {
+      return res.status(400).json({
+        status: "failed",
+        message:
+          "data with this id is not defined",
+      })
+    }
+
     res.status(200).json({
       status: "success",
       requestTime: req.requestTime,
@@ -80,6 +88,14 @@ const editTour = async (req, res) => {
       { new: true }
     )
 
+    if (!tour) {
+      return res.status(400).json({
+        status: "failed",
+        message:
+          "data with this id is not defined",
+      })
+    }
+
     res.status(201).json({
       status: "success",
       data: {
@@ -97,13 +113,19 @@ const editTour = async (req, res) => {
 const removeTour = async (req, res) => {
   try {
     const id = req.params.id
-    const tour = await Tour.findByIdAndRemove(id)
+    const tour = await Tour.findByIdAndDelete(id)
 
-    res.status(201).json({
+    if (!tour) {
+      return res.status(400).json({
+        status: "failed",
+        message:
+          "data with this id is not defined",
+      })
+    }
+
+    return res.status(201).json({
       status: "success",
-      data: {
-        tour: null,
-      },
+      message: "data deleted successfully",
     })
   } catch (err) {
     res.status(400).json({
