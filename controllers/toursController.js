@@ -2,47 +2,13 @@ const fs = require("fs")
 
 const Tour = require(".././models/toursModel")
 
-const createTourModel = async (req, res) => {
-  try {
-    const newTour = await Tour.create(req.body)
-    // 201 = CREATED
-    res.status(201).json({
-      status: "success",
-      data: {
-        tour: newTour,
-      },
-    })
-  } catch (err) {
-    res.status(400).json({
-      status: "failed",
-      message: err.message,
-    })
-  }
-}
-
-const tours = JSON.parse(
-  fs.readFileSync(
-    `${__dirname}/../dev-data/data/tours-simple.json`
-  )
-)
-
 const checkData = (req, res, next, val) => {
   const tour = Tour.findById(val)
 
   if (!tour) {
     return res.status(404).json({
       status: "failed",
-      message: `data with ${val} this not found`,
-    })
-  }
-  next()
-}
-
-const checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(404).json({
-      status: "failed",
-      message: `name and price are required`,
+      message: `data with this id ${val} not found`,
     })
   }
   next()
@@ -87,90 +53,71 @@ const getTourById = async (req, res) => {
   }
 }
 
-const createTour = (req, res) => {
-  console.log(req.body.role)
-  // generate id untuk data baru dari request api kita
-  const newId = tours[tours.length - 1].id + 1
-  const newData = Object.assign(
-    { id: newId },
-    req.body
-  )
-
-  tours.push(newData)
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      // 201 = CREATED
-      res.status(201).json({
-        status: "success",
-        data: {
-          tour: newData,
-        },
-      })
-    }
-  )
-}
-
-const editTour = (req, res) => {
-  const id = req.params.id * 1
-  const tourIndex = tours.findIndex(
-    (el) => el.id === id
-  )
-
-  tours[tourIndex] = {
-    ...tours[tourIndex],
-    ...req.body,
+const createTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body)
+    // 201 = CREATED
+    res.status(201).json({
+      status: "success",
+      data: {
+        tour: newTour,
+      },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: "failed",
+      message: err.message,
+    })
   }
-
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(200).json({
-        status: "success",
-        message: `tour with this id ${id} edited`,
-        data: {
-          tour: tours[tourIndex],
-        },
-      })
-    }
-  )
 }
 
-const removeTour = (req, res) => {
-  // konversi string jadi number
-  const id = req.params.id * 1
+const editTour = async (req, res) => {
+  try {
+    const id = req.params.id
+    const tour = await Tour.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    )
 
-  // cari index dari data yg sesuai id di req.params
-  const tourIndex = tours.findIndex(
-    (el) => el.id === id
-  )
+    res.status(201).json({
+      status: "success",
+      data: {
+        tour: tour,
+      },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: "failed",
+      message: err.message,
+    })
+  }
+}
 
-  // proses mengahpus data sesuai index array nya => req.params.id
-  tours.splice(tourIndex, 1)
+const removeTour = async (req, res) => {
+  try {
+    const id = req.params.id
+    const tour = await Tour.findByIdAndRemove(id)
 
-  // proses update di file json nya
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(200).json({
-        status: "success",
-        message: "berhasil delete data",
-        data: null,
-      })
-    }
-  )
+    res.status(201).json({
+      status: "success",
+      data: {
+        tour: null,
+      },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: "failed",
+      message: err.message,
+    })
+  }
 }
 
 module.exports = {
   getAllTours,
   getTourById,
   createTour,
-  createTourModel,
   editTour,
   removeTour,
   checkData,
-  checkBody,
 }

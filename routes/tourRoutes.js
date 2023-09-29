@@ -9,14 +9,7 @@ router.param("id", toursController.checkData)
 router
   .route("/")
   .get(toursController.getAllTours)
-  .post(
-    toursController.checkBody,
-    toursController.createTour
-  )
-
-router
-  .route("/model")
-  .post(toursController.createTourModel)
+  .post(toursController.createTour)
 
 router
   .route("/:id")
